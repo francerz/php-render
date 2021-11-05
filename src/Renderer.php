@@ -69,11 +69,7 @@ class Renderer extends SuperContainer
     private function restoreServerState()
     {
         http_response_code($this->backCode);
-        $headers = static::getCurrentHeaders();
-        foreach ($headers as $header) {
-            [$hname] = explode(':', $header, 2);
-            header_remove($hname);
-        }
+        header_remove();
         foreach ($this->backHeaders as $header) {
             header($header);
         }
