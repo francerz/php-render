@@ -1,0 +1,24 @@
+{
+    "name": "francerz/render",
+    "type": "library",
+    "require": {
+        "psr/http-factory": "^1.0",
+        "francerz/filesystem-utils": "^0.1.0",
+        "francerz/php-power-data": "^0.1.25"
+    },
+    "require-dev": {
+        "francerz/http": "^0.3.8",
+        "phpunit/phpunit": "8.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Francerz\\Render\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Francerz",
+            "email": "francerzam@hotmail.com"
+        }
+    ]
+}
