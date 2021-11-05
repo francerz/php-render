@@ -68,10 +68,12 @@ class Renderer extends SuperContainer
 
     private function restoreServerState()
     {
-        http_response_code($this->backCode);
-        header_remove();
-        foreach ($this->backHeaders as $header) {
-            header($header);
+        if (!headers_sent()) {
+            http_response_code($this->backCode);
+            header_remove();
+            foreach ($this->backHeaders as $header) {
+                header($header);
+            }
         }
     }
 
