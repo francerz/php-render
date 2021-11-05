@@ -90,7 +90,7 @@ class Renderer extends SuperContainer
         $tmpfile = tmpfile();
         ob_start(function (string $buffer) use ($tmpfile) {
             fwrite($tmpfile, $buffer);
-            return $buffer;
+            return '';
         }, 4096);
 
         // Starts loading content
