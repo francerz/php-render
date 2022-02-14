@@ -6,6 +6,9 @@ use Francerz\FileSystem\Utils\Path;
 use Francerz\PowerData\Strings;
 use LogicException;
 
+/**
+ * @internal
+ */
 abstract class SuperContainer
 {
     private static $sharedViewsPath = null;

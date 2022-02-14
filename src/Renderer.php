@@ -4,6 +4,7 @@ namespace Francerz\Render;
 
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
+use RuntimeException;
 
 class Renderer extends SuperContainer
 {
@@ -42,6 +43,19 @@ class Renderer extends SuperContainer
         $this->streamFactory = $streamFactory;
     }
 
+    private static function getCurrentHeaders()
+    {
+        if (PHP_SAPI !== 'cli') {
+            return \headers_list();
+        }
+
+        if (function_exists('xdebug_get_headers')) {
+            return \xdebug_get_headers();
+        }
+
+        return [];
+    }
+
     private static function getRenderHeaders()
     {
         $headers = [];
@@ -53,13 +67,6 @@ class Renderer extends SuperContainer
         return $headers;
     }
 
-    private static function getCurrentHeaders()
-    {
-        return php_sapi_name() === 'cli' ?
-            \xdebug_get_headers() :
-            \headers_list();
-    }
-
     private function backServerState()
     {
         $this->backHeaders = static::getCurrentHeaders();
@@ -68,12 +75,14 @@ class Renderer extends SuperContainer
 
     private function restoreServerState()
     {
-        if (!headers_sent()) {
-            http_response_code($this->backCode);
-            header_remove();
-            foreach ($this->backHeaders as $header) {
-                header($header);
-            }
+        if (headers_sent()) {
+            return;
+        }
+
+        http_response_code($this->backCode);
+        header_remove();
+        foreach ($this->backHeaders as $header) {
+            header($header);
         }
     }
 
@@ -88,6 +97,10 @@ class Renderer extends SuperContainer
 
         // Start output buffering to tmpfile
         $tmpfile = tmpfile();
+        if ($tmpfile === false) {
+            throw new RuntimeException('Failed to create temp file.');
+        }
+
         ob_start(function (string $buffer) use ($tmpfile) {
             fwrite($tmpfile, $buffer);
             return '';
@@ -106,9 +119,9 @@ class Renderer extends SuperContainer
         $stream = $this->streamFactory->createStreamFromResource($tmpfile);
 
         // Creates PSR-7 ResponseInterface
-        $response = $this->responseFactory->createResponse();
-        $response = $response->withBody($stream);
-        $response = $response->withStatus(http_response_code());
+        $response = $this->responseFactory
+            ->createResponse(http_response_code() ?: 200)
+            ->withBody($stream);
 
         // Assign all new headers to response
         $headers = static::getRenderHeaders();
@@ -128,7 +141,7 @@ class Renderer extends SuperContainer
     {
         $stream = $this->streamFactory->createStream(json_encode($data));
         return $this->responseFactory->createResponse()
-            ->withHeader('Content-type', 'application/json')
+            ->withHeader('Content-Type', 'application/json')
             ->withBody($stream);
     }
 }
