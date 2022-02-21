@@ -4,18 +4,13 @@ namespace Francerz\Render;
 
 class HTML extends SuperContainer
 {
-    public function include($view, array $data = [])
+    public static function include(string $view, array $data = [])
     {
-        extract($data);
-        include $this->getViewPath($view);
-    }
-
-    public function layout(string $layout, array $data = [])
-    {
-    }
-
-    public function section(string $section, array $data = [])
-    {
+        $view = static::getViewPath($view);
+        (function () use ($view, $data) {
+            extract($data);
+            include $view;
+        })();
     }
 
     public function startSection(string $section)

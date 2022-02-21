@@ -23,7 +23,7 @@ abstract class SuperContainer
         return static::$sharedViewsPath;
     }
 
-    protected function getViewPath(string $view)
+    protected static function getViewPath(string $view)
     {
         if (!empty(static::$sharedViewsPath)) {
             $view = Path::join(static::$sharedViewsPath, $view);
