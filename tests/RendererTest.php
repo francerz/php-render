@@ -61,4 +61,14 @@ class RendererTest extends TestCase
         $response = $this->renderer->renderJson(['a' => 1]);
         $this->assertEquals('{"a":1}', (string)$response->getBody());
     }
+
+    public function testRenderHTML()
+    {
+        $response = $this->renderer->render('content');
+
+        $this->assertTrue(true);
+        $expected = "<main><p>Inner</p>\n</main>\n";
+        $actual = (string)$response->getBody();
+        $this->assertEquals($expected, $actual);
+    }
 }

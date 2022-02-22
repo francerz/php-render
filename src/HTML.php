@@ -4,6 +4,18 @@ namespace Francerz\Render;
 
 class HTML extends SuperContainer
 {
+    private static $layout;
+    private static $sections = [];
+
+    public static function layout(string $layout, array $data = [])
+    {
+        self::$layout = (object)[
+            'layout' => static::getViewPath($layout),
+            'data' => $data
+        ];
+        ob_start();
+    }
+
     public static function include(string $view, array $data = [])
     {
         $view = static::getViewPath($view);
@@ -13,17 +25,36 @@ class HTML extends SuperContainer
         })();
     }
 
-    public function startSection(string $section)
+    public static function startSection(string $section)
     {
-        $__this = $this;
-        ob_start(function (string $buffer) use ($__this, $section) {
-            $__this->sections[$section] = $buffer;
+        ob_start(function (string $buffer) use ($section) {
+            self::$sections[$section] =
+                self::$sections[$section] ?? '' .
+                $buffer;
             return $buffer;
         });
     }
 
-    public function endSection()
+    public static function endSection()
     {
-        ob_get_clean();
+        ob_end_clean();
+    }
+
+    public static function section(string $section)
+    {
+        echo self::$sections[$section] ?? '';
+    }
+
+    public static function render()
+    {
+        if (isset(self::$layout)) {
+            ob_end_clean();
+            (function () {
+                extract(self::$layout->data);
+                include self::$layout->layout;
+            })();
+            return;
+        }
+        echo ob_get_clean();
     }
 }
